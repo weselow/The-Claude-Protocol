@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 # Map agent model preferences to Codex models
 MODEL_MAPPING = {
-    "haiku": "gpt-5.1-codex-mini",    # Scout, Scribe - cheaper, faster
+    "haiku": "gpt-5.1-codex-mini",    # Scout, Scribe, Code-Reviewer - cheaper, faster
     "sonnet": "gpt-5.2-codex",        # Discovery - latest frontier
-    "opus": "gpt-5.1-codex-max",      # Detective, Architect, Worker - deep reasoning
+    "opus": "gpt-5.1-codex-max",      # Detective, Architect - deep reasoning
 }
 
 

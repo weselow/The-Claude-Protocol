@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Two-phase code review - spec compliance then code quality
-model: sonnet
+model: haiku
 tools:
   - Read
   - Glob
