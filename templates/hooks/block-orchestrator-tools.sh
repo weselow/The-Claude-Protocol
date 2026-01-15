@@ -30,17 +30,17 @@ fi
 [[ "$IS_SUBAGENT" == "true" ]] && exit 0
 
 # Orchestrator allowlist
-ALLOWED="Task|Bash|Glob|Read|AskUserQuestion|TodoWrite|Skill|EnterPlanMode|ExitPlanMode|mcp__codex_delegator__invoke_agent"
+ALLOWED="Task|Bash|Glob|Read|AskUserQuestion|TodoWrite|Skill|EnterPlanMode|ExitPlanMode|mcp__provider_delegator__invoke_agent"
 
 if [[ ! "$TOOL_NAME" =~ ^($ALLOWED)$ ]]; then
   cat << EOF
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Tool '$TOOL_NAME' blocked. Orchestrators delegate via Task() or mcp__codex_delegator__invoke_agent(). They don't implement."}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Tool '$TOOL_NAME' blocked. Orchestrators delegate via Task() or mcp__provider_delegator__invoke_agent(). They don't implement."}}
 EOF
   exit 0
 fi
 
 # Validate Codex agent invocations - block implementation agents
-if [[ "$TOOL_NAME" == "mcp__codex_delegator__invoke_agent" ]]; then
+if [[ "$TOOL_NAME" == "mcp__provider_delegator__invoke_agent" ]]; then
   AGENT=$(echo "$INPUT" | jq -r '.tool_input.agent // empty')
   CODEX_ALLOWED="scout|detective|architect|scribe|code-reviewer"
 

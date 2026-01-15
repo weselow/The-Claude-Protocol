@@ -49,7 +49,7 @@ if [[ "$AGENT_TYPE" =~ supervisor ]]; then
     # Check for code review approval (must have both invocation and approval)
     if [[ "$HAS_CODE_REVIEW" -lt 1 ]] || [[ "$HAS_APPROVED" -lt 1 ]]; then
       cat << 'EOF'
-{"decision":"block","reason":"Code review required before completion.\n\n1. Request review:\n   mcp__codex_delegator__invoke_agent(\n     agent=\"code-reviewer\",\n     task_prompt=\"Review BEAD_ID: {ID}\\nBranch: bd-{ID}\"\n   )\n\n2. If approved, add comment:\n   bd comment {ID} \"CODE REVIEW: APPROVED - [summary]\"\n\n3. If not approved, fix issues and repeat."}
+{"decision":"block","reason":"Code review required before completion.\n\n1. Request review:\n   mcp__provider_delegator__invoke_agent(\n     agent=\"code-reviewer\",\n     task_prompt=\"Review BEAD_ID: {ID}\\nBranch: bd-{ID}\"\n   )\n\n2. If approved, add comment:\n   bd comment {ID} \"CODE REVIEW: APPROVED - [summary]\"\n\n3. If not approved, fix issues and repeat."}
 EOF
       exit 0
     fi
