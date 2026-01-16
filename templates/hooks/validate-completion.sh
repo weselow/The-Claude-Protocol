@@ -35,21 +35,24 @@ if [[ "$AGENT_TYPE" =~ supervisor ]]; then
     HAS_COMMENT=$(grep -c '"bd comment\|"command":"bd comment' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_COMMENT=0
 
     # Supervisors must get code review approval before completing
-    # Check for: 1) code-reviewer invocation AND 2) APPROVED comment
-    HAS_CODE_REVIEW=$(grep -c 'code-reviewer\|"agent":"code-reviewer"' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_CODE_REVIEW=0
-    HAS_APPROVED=$(grep -c 'APPROVED\|"APPROVED"' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_APPROVED=0
+    # Check for ACTUAL code-reviewer dispatch (not just reading the file):
+    # - Claude-only: Task with subagent_type="code-reviewer"
+    # - External providers: mcp__provider_delegator__invoke_agent with agent="code-reviewer"
+    # Note: Supervisors cannot self-approve - must dispatch actual code-reviewer agent
+    HAS_CODE_REVIEW_DISPATCH=$(grep -cE '"subagent_type":\s*"code-reviewer"|"subagent_type":"code-reviewer"|subagent_type.*code-reviewer|mcp__provider_delegator__invoke_agent.*code-reviewer|"agent":\s*"code-reviewer"' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_CODE_REVIEW_DISPATCH=0
+    HAS_APPROVED=$(grep -c 'CODE REVIEW: APPROVED\|"CODE REVIEW: APPROVED"' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_APPROVED=0
 
     # Default to 0 if empty
     [[ -z "$HAS_BEAD_COMPLETE" ]] && HAS_BEAD_COMPLETE=0
     [[ -z "$HAS_BRANCH" ]] && HAS_BRANCH=0
     [[ -z "$HAS_COMMENT" ]] && HAS_COMMENT=0
-    [[ -z "$HAS_CODE_REVIEW" ]] && HAS_CODE_REVIEW=0
+    [[ -z "$HAS_CODE_REVIEW_DISPATCH" ]] && HAS_CODE_REVIEW_DISPATCH=0
     [[ -z "$HAS_APPROVED" ]] && HAS_APPROVED=0
 
-    # Check for code review approval (must have both invocation and approval)
-    if [[ "$HAS_CODE_REVIEW" -lt 1 ]] || [[ "$HAS_APPROVED" -lt 1 ]]; then
+    # Check for code review approval (must have actual dispatch AND approval)
+    if [[ "$HAS_CODE_REVIEW_DISPATCH" -lt 1 ]] || [[ "$HAS_APPROVED" -lt 1 ]]; then
       cat << 'EOF'
-{"decision":"block","reason":"Code review required before completion.\n\n1. Request review:\n   mcp__provider_delegator__invoke_agent(\n     agent=\"code-reviewer\",\n     task_prompt=\"Review BEAD_ID: {ID}\\nBranch: bd-{ID}\"\n   )\n\n2. If approved, add comment:\n   bd comment {ID} \"CODE REVIEW: APPROVED - [summary]\"\n\n3. If not approved, fix issues and repeat."}
+{"decision":"block","reason":"Code review required before completion. You MUST dispatch the code-reviewer agent.\n\nOption 1 (Claude-only):\n   Task(\n     subagent_type=\"code-reviewer\",\n     prompt=\"Review BEAD_ID: {ID}\"\n   )\n\nOption 2 (External providers):\n   mcp__provider_delegator__invoke_agent(\n     agent=\"code-reviewer\",\n     task_prompt=\"Review BEAD_ID: {ID}\"\n   )\n\nYou cannot self-approve. The code-reviewer agent must return APPROVED."}
 EOF
       exit 0
     fi
