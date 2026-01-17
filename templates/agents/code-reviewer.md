@@ -140,25 +140,35 @@ Using the diff from Step 0 (`git diff main...bd-{BEAD_ID}`), review code quality
 
 ### If NOT APPROVED:
 
-```
-CODE REVIEW: NOT APPROVED
+1. **Add the rejection comment yourself:**
+   ```bash
+   bd comment {BEAD_ID} "CODE REVIEW: NOT APPROVED - [brief reason]"
+   ```
 
-Reviewed: {BEAD_ID} on branch bd-{BEAD_ID}
+2. **Return rejection with clear instructions:**
+   ```
+   CODE REVIEW: NOT APPROVED
 
-Phase 1 - Spec Compliance: ❌ (or ✅ if passed)
-Issues:
-- MISSING: [requirement not implemented] (file:line)
-- EXTRA: [feature not requested - remove it]
-- WRONG: [misunderstood requirement] (file:line)
+   Reviewed: {BEAD_ID} on branch bd-{BEAD_ID}
 
-Phase 2 - Code Quality: ❌ (or skipped if Phase 1 failed)
-Issues:
-- CRITICAL: [bug or security issue] (file:line)
-- IMPORTANT: [pattern violation] (file:line)
+   Phase 1 - Spec Compliance: ❌ (or ✅ if passed)
+   Issues:
+   - MISSING: [requirement not implemented] (file:line)
+   - EXTRA: [feature not requested - remove it]
+   - WRONG: [misunderstood requirement] (file:line)
 
-Fix these issues and request review again.
-Do NOT proceed until approved.
-```
+   Phase 2 - Code Quality: ❌ (or skipped if Phase 1 failed)
+   Issues:
+   - CRITICAL: [bug or security issue] (file:line)
+   - IMPORTANT: [pattern violation] (file:line)
+
+   ORCHESTRATOR ACTION REQUIRED:
+   Return this bead to the original supervisor with these issues.
+   The supervisor must fix all issues and mark inreview again.
+   Then dispatch code-reviewer for re-review.
+
+   Do NOT close this bead until CODE REVIEW: APPROVED.
+   ```
 
 ## What You DON'T Do
 

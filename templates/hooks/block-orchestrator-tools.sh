@@ -100,6 +100,8 @@ EOF
   # ALLOW beads commands (with validation)
   if [[ "$FIRST_WORD" == "bd" ]]; then
     SECOND_WORD=$(echo "$COMMAND" | awk '{print $2}')
+
+    # Validate bd create requires description
     if [[ "$SECOND_WORD" == "create" ]] || [[ "$SECOND_WORD" == "new" ]]; then
       if [[ "$COMMAND" != *"-d "* ]] && [[ "$COMMAND" != *"--description "* ]] && [[ "$COMMAND" != *"--description="* ]]; then
         cat << EOF
@@ -108,6 +110,25 @@ EOF
         exit 0
       fi
     fi
+
+    # CRITICAL: Validate code review before closing bead
+    if [[ "$SECOND_WORD" == "update" ]] && [[ "$COMMAND" == *"done"* ]]; then
+      # Extract bead ID from command (e.g., "bd update BD-001 --status done")
+      BEAD_ID=$(echo "$COMMAND" | grep -oE 'BD-[0-9]+' | head -1)
+
+      if [[ -n "$BEAD_ID" ]]; then
+        # Check if bead has CODE REVIEW: APPROVED comment
+        COMMENTS=$(bd comments "$BEAD_ID" 2>/dev/null)
+
+        if [[ "$COMMENTS" != *"CODE REVIEW: APPROVED"* ]]; then
+          cat << EOF
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Cannot close $BEAD_ID - no code review approval found. Dispatch code-reviewer first: Task(subagent_type='code-reviewer', prompt='Review BEAD_ID: $BEAD_ID on branch bd-$BEAD_ID'). After approval, retry closing."}}
+EOF
+          exit 0
+        fi
+      fi
+    fi
+
     exit 0
   fi
 
