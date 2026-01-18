@@ -23,7 +23,7 @@ PROMPT=$(echo "$INPUT" | jq -r '.tool_input.prompt // empty')
 # Check for BEAD_ID in prompt
 if [[ "$PROMPT" != *"BEAD_ID:"* ]]; then
   cat << 'EOF'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Supervisor dispatch requires a bead.\n\nCreate one first:\n  bd create \"Task title\" --description \"Details\"\n\nThen include in dispatch:\n  BEAD_ID: {id}\n  Branch: bd-{id}\n  Task: ...\n\nWorker-supervisor is exempt for small tasks."}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"<bead-required>\n<priority>CREATE A BEAD FIRST - Do NOT dispatch worker-supervisor as a workaround.</priority>\n\n<rule>\nAll supervisor work MUST be tracked with a bead.\nWorker-supervisor is ONLY for trivial tasks (typos, single-line fixes, config tweaks).\nIf the task requires more than minimal code changes, CREATE A BEAD.\n</rule>\n\n<action>\n1. Create bead:\n   bd create \"Task title\" -d \"Detailed description for supervisor\"\n\n2. Then dispatch supervisor with:\n   BEAD_ID: {id}\n   Branch: bd-{id}\n   Task: [description]\n</action>\n\n<warning>\nDo NOT use worker-supervisor to avoid bead creation.\nBeads enable: code review, branch tracking, merge enforcement.\n</warning>\n</bead-required>"}}
 EOF
   exit 0
 fi
