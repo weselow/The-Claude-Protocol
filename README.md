@@ -78,6 +78,44 @@ Beads Orchestration turns a single Claude Code session into a coordinated team o
 - **One bead = one branch = one task** - Git-native task isolation
 - **Mandatory code review** - No completion without approval
 - **Minimal context overhead** - Uses `beads` CLI instead of heavy MCP servers
+- **Process over knowledge** - Agents know how to code; we teach them the process
+- **Verification-first development** - Assumptions are bugs; verify before implementing
+
+## Philosophy: Process Over Knowledge
+
+Traditional agent prompts are bloated with code examples and tutorials. This is wasteful—Claude already knows how to write FastAPI endpoints or React components.
+
+**What agents need is not knowledge, but discipline.**
+
+Our supervisors are streamlined (~150-220 lines) and focus on:
+- **Process** - The beads workflow, verification phases, code review gates
+- **Scope** - What to handle vs. what to escalate
+- **Standards** - "Follow PEP-8", not "here's how to format code"
+
+What we remove:
+- Code examples longer than 3 lines
+- "Here's how to do X" tutorials
+- Pattern implementations
+- "Common mistakes" demonstrations
+
+**The discipline skill teaches the development process; Claude already knows the code.**
+
+## Verification-First Development
+
+All supervisors invoke the `subagents-discipline` skill which enforces:
+
+```
+Phase 0: DISCOVER - Find infrastructure (env vars, database, APIs)
+Phase 1: VERIFY   - Verify ALL assumptions before implementing
+Phase 2: HANDLE   - Handle failure modes explicitly
+Phase 3: TEST     - Test against real infrastructure
+Phase 4: CLAIM    - Only claim done with fresh evidence
+```
+
+**Key mandates:**
+- **Interface verification** - NEVER write code against assumed interfaces. Inspect actual format first.
+- **Gate functions** - Cannot proceed without verification evidence
+- **No rubber-stamping** - Every claim requires `file:line` proof
 
 ## Architecture
 
@@ -279,18 +317,22 @@ Every supervisor follows the beads workflow automatically:
 ```
 ON START:
   1. Receive BEAD_ID from orchestrator
-  2. Create branch: git checkout -b bd-{BEAD_ID}
+  2. Mark in progress: bd update {BEAD_ID} --status in_progress
+  3. Create branch: git checkout -b bd-{BEAD_ID}
+  4. INVOKE DISCIPLINE SKILL (mandatory)
 
-DURING WORK:
-  3. Implement using specialty knowledge
-  4. Commit frequently
-  5. Log progress: bd comment {BEAD_ID} "..."
+DURING WORK (Verification-First):
+  5. Phase 0: Discover infrastructure
+  6. Phase 1: Verify ALL assumptions before coding
+  7. Phase 2: Handle failure modes explicitly
+  8. Phase 3: Test against real infrastructure
+  9. Commit frequently, log progress
 
 ON COMPLETION:
-  6. Run tests
-  7. Request code review (MANDATORY)
-  8. If approved → Mark: bd update {BEAD_ID} --status inreview
-  9. If not approved → Fix issues, repeat code review
+  10. Phase 4: Run fresh verification, capture evidence
+  11. Request code review (MANDATORY)
+  12. If approved → Mark: bd update {BEAD_ID} --status inreview
+  13. If not approved → Fix issues, repeat code review
 ```
 
 ### Parallel Work
@@ -485,7 +527,12 @@ The discovery agent scans your codebase and creates appropriate supervisors:
 | Dockerfile | infra-supervisor |
 | pubspec.yaml | flutter-supervisor |
 
-Supervisors are sourced from [sub-agents.directory](https://github.com/ayush-that/sub-agents.directory) with the beads workflow injected.
+Supervisors are sourced from [sub-agents.directory](https://github.com/ayush-that/sub-agents.directory) and then **filtered** to follow our process-over-knowledge philosophy:
+
+**Kept:** Standards references, tech stack names, scope definitions, quality guidelines
+**Removed:** Code examples (>3 lines), tutorials, pattern implementations, "common mistakes"
+
+**Target size:** ~150-220 lines per supervisor (down from 500-800 lines in external sources)
 
 ### Frontend Supervisor Registration
 

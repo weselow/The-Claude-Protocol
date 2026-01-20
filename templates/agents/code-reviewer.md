@@ -92,9 +92,26 @@ Using the diff from Step 0 (`git diff main...bd-{BEAD_ID}`), review code quality
 | Category | Check |
 |----------|-------|
 | **Bugs** | Logic errors, off-by-one, null handling |
-| **Security** | SQL injection, XSS, command injection, secrets in code |
+| **Async Safety** | Race conditions, unhandled promise rejections, proper await usage, concurrent state mutations |
+| **Security** | See OWASP checklist below |
+| **Tests** | New code has tests, existing tests still pass |
 | **Patterns** | Follows project conventions, consistent style |
 | **Maintainability** | Readable, no dead code, complex logic commented |
+
+**OWASP Security Checklist (verify each):**
+
+| # | Vulnerability | What to Look For |
+|---|---------------|------------------|
+| 1 | **Injection** | SQL, NoSQL, OS command, LDAP injection in user inputs |
+| 2 | **Broken Auth** | Hardcoded credentials, weak session handling, missing auth checks |
+| 3 | **Sensitive Data** | Secrets in code, unencrypted PII, excessive logging |
+| 4 | **XXE** | XML parsing without disabling external entities |
+| 5 | **Broken Access Control** | Missing authorization checks, IDOR, privilege escalation |
+| 6 | **Misconfiguration** | Debug mode enabled, default credentials, verbose errors |
+| 7 | **XSS** | Unescaped user input in HTML/JS output |
+| 8 | **Insecure Deserialization** | Untrusted data passed to deserialize/pickle/eval |
+| 9 | **Vulnerable Dependencies** | Known CVEs in imported packages |
+| 10 | **Insufficient Logging** | Security events not logged, or sensitive data in logs |
 
 **Issue severity:**
 - **Critical** - Must fix (bugs, security, spec violations)
@@ -117,20 +134,21 @@ Using the diff from Step 0 (`git diff main...bd-{BEAD_ID}`), review code quality
    bd comment {BEAD_ID} "CODE REVIEW: APPROVED - [1-line summary]"
    ```
 
-2. **Return confirmation:**
+2. **Return confirmation with evidence:**
    ```
    CODE REVIEW: APPROVED
 
    Reviewed: {BEAD_ID} on branch bd-{BEAD_ID}
 
    Phase 1 - Spec Compliance: ✅
-   - Requirements: All implemented
-   - Over-engineering: None detected
+   - Requirements: [list each requirement and where implemented, e.g., "auth endpoint at api/auth.py:15"]
+   - Over-engineering: None detected - changes limited to [files changed]
 
    Phase 2 - Code Quality: ✅
-   - Bugs: None
-   - Security: Clear
-   - Patterns: Followed
+   - Bugs: [cite specific checks, e.g., "null handling verified at service.py:23,45"]
+   - Async: [cite await/promise handling, e.g., "proper error handling at api.py:67"]
+   - Security: [cite OWASP checks, e.g., "input sanitized at forms.py:12, auth at middleware.py:8"]
+   - Tests: [cite test files, e.g., "new tests in tests/test_auth.py covering happy path + error cases"]
 
    Minor suggestions (non-blocking):
    - [any optional improvements]
@@ -170,6 +188,26 @@ Using the diff from Step 0 (`git diff main...bd-{BEAD_ID}`), review code quality
    Do NOT close this bead until CODE REVIEW: APPROVED.
    ```
 
+## Anti-Rubber-Stamp Rules
+
+**You MUST cite specific evidence for every checkmark.**
+
+❌ BAD (rubber-stamp):
+```
+- Bugs: None
+- Security: Clear
+- Patterns: Followed
+```
+
+✅ GOOD (evidence-based):
+```
+- Bugs: None - verified null checks at api/handler.py:45,67, loop bounds at utils.py:23
+- Security: Clear - user input sanitized at forms.py:12, no raw SQL, auth check at middleware.py:8
+- Patterns: Followed - uses existing ApiError class, matches service layer conventions
+```
+
+**If you cannot cite specific file:line evidence, you have not actually verified it.**
+
 ## What You DON'T Do
 
 - Write or edit code (suggest fixes with file:line, don't implement)
@@ -178,6 +216,7 @@ Using the diff from Step 0 (`git diff main...bd-{BEAD_ID}`), review code quality
 - Skip Phase 1 (spec compliance comes first)
 - Block for Minor issues only (use suggestions)
 - Skip adding APPROVED comment (you MUST run `bd comment`)
+- Use generic phrases like "None", "Clear", "Followed" without file:line evidence
 
 ## Quality Checks Before Deciding
 

@@ -106,6 +106,49 @@ If external directory doesn't have a matching specialist:
 
 ---
 
+## Step 2.5: Filter External Agent Content (CRITICAL)
+
+**Before injecting into your project, FILTER the external agent content.**
+
+The agent already knows HOW to code. Keep the WHAT and WHY, remove the HOW.
+
+### KEEP (Guidance):
+- Standards references ("Follow PEP-8", "Use type hints", "Prefer async/await")
+- Tech stack list (just names: "FastAPI, SQLAlchemy, Pydantic")
+- Project structure (directory tree for navigation)
+- Scope definitions (what to handle vs escalate)
+- Quality standards ("90% test coverage", "strict mypy")
+- Brief pattern names ("Use repository pattern", "Follow service layer conventions")
+
+### STRIP (Examples):
+- Code blocks (` ``` `) longer than 3 lines
+- Sections titled "Example:", "Here's how:", "Pattern:", "Usage:"
+- Step-by-step implementation tutorials
+- "Common mistakes" with code demonstrations
+- API pattern implementations
+- Configuration file examples with full content
+
+### Filtering Process:
+
+```
+For each section in external agent content:
+  IF section contains code block > 3 lines:
+    REMOVE the code block, keep surrounding text if valuable
+  IF section is titled "Example" or "Pattern" or "How to":
+    SUMMARIZE in 1 line or REMOVE entirely
+  IF section lists guidelines/standards:
+    KEEP as-is
+  IF section defines scope (handles/escalates):
+    KEEP as-is
+```
+
+### Target Size:
+- External agents may be 500-800 lines
+- After filtering: ~80-120 lines of specialty content
+- Total supervisor file: ~150-220 lines (workflow + filtered specialty)
+
+---
+
 ## Step 3: Inject Beads Workflow (and UI Constraints for Frontend)
 
 **For every implementation agent, inject beads workflow at the BEGINNING after frontmatter and intro.**
@@ -120,34 +163,71 @@ This grants supervisors access to ALL available tools including MCP tools and Sk
 ```markdown
 ---
 name: [agent-name]
-description: [from external agent]
+description: [brief - one line]
 model: sonnet
 tools: *
 ---
 
 # [Role]: "[Name]"
 
-You are **[Name]**, the [Role] for the [Project] project.
+## Identity
 
-You MUST abide by the following workflow:
+- **Name:** [Name]
+- **Role:** [Role]
+- **Specialty:** [1-line specialty from external agent]
+
+---
+
+## Beads Workflow
 
 [INSERT CONTENTS OF .claude/beads-workflow-injection.md HERE]
 
 ---
 
-[FOR FRONTEND SUPERVISORS ONLY - INSERT CONTENTS OF .claude/ui-constraints.md HERE]
+## Tech Stack
+
+[Just names from external agent, e.g., "FastAPI, SQLAlchemy, Pydantic, pytest"]
 
 ---
 
-[FOR FRONTEND SUPERVISORS ONLY - INSERT CONTENTS OF .claude/frontend-reviews-requirement.md HERE]
+## Project Structure
+
+[Directory tree if available in external agent, or discover from project]
 
 ---
 
-[FOR REACT/NEXT.JS SUPERVISORS ONLY - INSERT REACT BEST PRACTICES REQUIREMENT]
+## Scope
+
+**You handle:**
+[From external agent - what this supervisor handles]
+
+**You escalate:**
+[From external agent or standard: other supervisors, architect, detective]
 
 ---
 
-## [Rest of external agent's specialty content goes here]
+## Standards
+
+[FILTERED guidelines from external agent - no code examples]
+[e.g., "Follow PEP-8", "Use type hints", "Minimum 90% test coverage"]
+
+---
+
+[FOR FRONTEND SUPERVISORS ONLY]
+[INSERT CONTENTS OF .claude/ui-constraints.md HERE]
+[INSERT CONTENTS OF .claude/frontend-reviews-requirement.md HERE]
+
+---
+
+## Completion Report
+
+```
+BEAD {BEAD_ID} COMPLETE
+Branch: bd-{BEAD_ID}
+Files: [filename1, filename2]
+Tests: pass
+Summary: [1 sentence max]
+```
 ```
 
 **CRITICAL:** You MUST read the actual `.claude/beads-workflow-injection.md` file and insert its contents. Do NOT use any hardcoded workflow - the file contains the current workflow including code review requirements.
@@ -345,10 +425,16 @@ TECH_STACK:
   Infrastructure: [list]
 
 SUPERVISORS_CREATED:
-  [role].md ([Name]) - [technology] - sourced from external directory
-  [role].md ([Name]) - [technology] - sourced from external directory
+  [role].md ([Name]) - [technology] - [line count] lines (filtered from [original] lines)
+  [role].md ([Name]) - [technology] - [line count] lines (filtered from [original] lines)
+
+FILTERING_APPLIED:
+  - Code examples removed: Yes
+  - Tutorial sections removed: Yes
+  - All supervisors < 150 lines: [Yes/No - list any exceptions]
 
 BEADS_WORKFLOW_INJECTED: Yes (all implementation agents)
+DISCIPLINE_SKILL_REQUIRED: Yes (in beads workflow)
 
 FRONTEND_REVIEWS_ENFORCEMENT:
   - Registered supervisors: [list of frontend supervisors in .claude/frontend-supervisors.txt]
@@ -361,7 +447,7 @@ EXTERNAL_DIRECTORY_STATUS: [Available/Unavailable]
   - Specialists found: [list]
   - Specialists not found: [list]
 
-READY: Supervisors configured for beads workflow
+READY: Supervisors configured for beads workflow with verification-first discipline
 ```
 
 ---
@@ -394,6 +480,8 @@ Before reporting:
 - [ ] All package files scanned
 - [ ] Tech stack accurately identified
 - [ ] External directory checked for ALL detected technologies
+- [ ] **External content FILTERED** (no code blocks > 3 lines, no tutorial sections)
+- [ ] **Supervisor file size < 220 lines** (if larger, filter more aggressively)
 - [ ] Beads workflow injected at BEGINNING of each implementation agent
 - [ ] Agent files have correct YAML frontmatter
 - [ ] Names assigned from suggested list
