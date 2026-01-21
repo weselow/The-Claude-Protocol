@@ -2,6 +2,8 @@
 
 Multi-agent orchestration for Claude Code. An orchestrator investigates issues, manages tasks automatically, and delegates implementation to specialized supervisors.
 
+**[Beads Kanban UI](https://github.com/AvivK5498/Beads-Kanban-UI)** — Visual task management fully compatible with this workflow. Supports tasks, epics, subtasks, dependencies, and design docs.
+
 ## Two Modes
 
 | Mode | Flag | Read-only Agents | Requirements |
