@@ -45,8 +45,7 @@
     "SubagentStop": [
       {
         "hooks": [
-          {"type": "command", "command": ".claude/hooks/validate-completion.sh"},
-          {"type": "command", "command": ".claude/hooks/enforce-frontend-reviews.sh"}
+          {"type": "command", "command": ".claude/hooks/validate-completion.sh"}
         ]
       }
     ],
