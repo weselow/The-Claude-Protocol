@@ -11,6 +11,16 @@ Multi-agent orchestration for Claude Code. An orchestrator investigates issues, 
 | **Claude-only** | `--claude-only` | Run via Claude Task() | beads CLI only |
 | **External Providers** | (default) | Run via Codex/Gemini | Codex CLI, Gemini CLI, uv |
 
+## Installation
+
+```bash
+npm install -g @avivkaplan/beads-orchestration
+```
+
+This installs the `create-beads-orchestration` skill to `~/.claude/skills/`.
+
+> **Note:** macOS and Linux only.
+
 ## Quick Start
 
 ```bash
@@ -19,17 +29,6 @@ Multi-agent orchestration for Claude Code. An orchestrator investigates issues, 
 ```
 
 The skill walks you through setup, then creates tech-specific supervisors based on your codebase.
-
-### Manual Installation
-
-```bash
-# Clone this repo
-git clone https://github.com/AvivK5498/Claude-Code-Beads-Orchestration
-
-# Copy the skill to your Claude skills directory
-mkdir -p ~/.claude/skills/create-beads-orchestration
-cp Claude-Code-Beads-Orchestration/skills/create-beads-orchestration/SKILL.md ~/.claude/skills/create-beads-orchestration/
-```
 
 ### Requirements
 
