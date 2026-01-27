@@ -39,6 +39,12 @@
         "hooks": [
           {"type": "command", "command": ".claude/hooks/enforce-concise-response.sh"}
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {"type": "command", "command": ".claude/hooks/memory-capture.sh", "timeout": 10}
+        ]
       }
     ],
     "SubagentStop": [

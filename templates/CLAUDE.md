@@ -32,6 +32,21 @@ This ensures:
 - No re-investigation if session ends
 - Audit trail if fix was wrong
 
+### Knowledge Base
+
+INVESTIGATION: and LEARNED: comments are automatically captured into `.beads/memory/knowledge.jsonl` by an async hook. This builds an evolving knowledge base of project conventions, gotchas, and patterns.
+
+**Before investigating a new issue, search existing knowledge:**
+
+```bash
+.beads/memory/recall.sh "keyword"                  # Search by keyword
+.beads/memory/recall.sh "keyword" --type learned   # Filter to learnings only
+.beads/memory/recall.sh --recent 10                # Show latest entries
+.beads/memory/recall.sh --stats                    # Knowledge base stats
+```
+
+Supervisors are **required** to log a LEARNED: comment before completing. The SubagentStop hook enforces this.
+
 ### Delegation Format
 
 ```

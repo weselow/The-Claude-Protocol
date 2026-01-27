@@ -100,4 +100,22 @@ if [[ -z "$IN_PROGRESS" && -z "$READY" && -z "$BLOCKED" && -z "$STALE" ]]; then
   echo "No active beads. Create one with: bd create \"Task title\" -d \"Description\""
 fi
 
+# ============================================================
+# Knowledge Base - Surface recent learnings
+# ============================================================
+KNOWLEDGE_FILE="$BEADS_DIR/memory/knowledge.jsonl"
+if [[ -f "$KNOWLEDGE_FILE" && -s "$KNOWLEDGE_FILE" ]]; then
+  TOTAL_ENTRIES=$(wc -l < "$KNOWLEDGE_FILE" | tr -d ' ')
+  echo ""
+  echo "## Recent Knowledge ($TOTAL_ENTRIES entries)"
+  echo ""
+  # Show 5 most recent, deduplicated by key (latest wins)
+  tail -20 "$KNOWLEDGE_FILE" | jq -s '
+    group_by(.key) | map(max_by(.ts)) | sort_by(-.ts) | .[0:5] | .[] |
+    "  [\(.type | ascii_upcase | .[0:5])] \(.content | .[0:100])  (\(.source))"
+  ' -r 2>/dev/null
+  echo ""
+  echo "  Search: .beads/memory/recall.sh \"keyword\""
+fi
+
 echo ""

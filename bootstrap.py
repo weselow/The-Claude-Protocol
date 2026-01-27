@@ -343,6 +343,28 @@ def _manual_beads_init(beads_dir: Path):
     print("  - Created .beads manually")
 
 
+def setup_memory(project_dir: Path) -> None:
+    """Create .beads/memory/ directory with knowledge store and recall script."""
+    memory_dir = project_dir / ".beads" / "memory"
+    memory_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create empty knowledge store
+    knowledge_file = memory_dir / "knowledge.jsonl"
+    if not knowledge_file.exists():
+        knowledge_file.touch()
+        print("  - Created .beads/memory/knowledge.jsonl")
+
+    # Copy recall script
+    recall_src = TEMPLATES_DIR / "memory" / "recall.sh"
+    recall_dest = memory_dir / "recall.sh"
+    if recall_src.exists():
+        shutil.copy2(recall_src, recall_dest)
+        recall_dest.chmod(recall_dest.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+        print("  - Copied .beads/memory/recall.sh")
+    else:
+        print("  - WARNING: recall.sh template not found")
+
+
 # ============================================================================
 # RAMS INSTALLATION (Accessibility Review)
 # ============================================================================
@@ -811,6 +833,7 @@ def main():
         copy_hooks(project_dir, claude_only=False)
         copy_settings(project_dir, claude_only=False)
         copy_claude_md(project_dir, project_name, claude_only=False)
+        setup_memory(project_dir)
         setup_gitignore(project_dir, claude_only=False)
         create_mcp_config(project_dir, venv_python)
     else:
@@ -830,6 +853,7 @@ def main():
         copy_hooks(project_dir, claude_only=True)
         copy_settings(project_dir, claude_only=True)
         copy_claude_md(project_dir, project_name, claude_only=True)
+        setup_memory(project_dir)
         setup_gitignore(project_dir, claude_only=True)
 
     # Verify

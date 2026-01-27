@@ -128,4 +128,15 @@ EOF
   exit 0
 fi
 
+# Check 8: LEARNED comment required (supervisors only, worker exempt)
+if [[ "$IS_SUPERVISOR" == "true" ]]; then
+  HAS_LEARNED=$(grep -c 'LEARNED:' "$AGENT_TRANSCRIPT" 2>/dev/null) || HAS_LEARNED=0
+  if [[ "$HAS_LEARNED" -lt 1 ]]; then
+    cat << 'EOF'
+{"decision":"block","reason":"Work verification failed: no LEARNED comment.\n\nBefore completing, record what you learned:\n  bd comment {BEAD_ID} \"LEARNED: [key technical insight from this task]\"\n\nExamples:\n  \"LEARNED: MenuBarExtra popup closes on NSWindow activate. Use activates:false.\"\n  \"LEARNED: All source adapters must handle nil SUFeedURL gracefully.\""}
+EOF
+    exit 0
+  fi
+fi
+
 echo '{"decision":"approve"}'

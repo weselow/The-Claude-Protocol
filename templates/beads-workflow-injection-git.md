@@ -71,17 +71,26 @@ WARNING: You will be BLOCKED if you skip any step. Execute ALL in order:
    git push origin bd-{BEAD_ID}
    ```
 
-3. **Leave completion comment:**
+3. **Log what you learned (REQUIRED - you will be blocked without this):**
+   ```bash
+   bd comment {BEAD_ID} "LEARNED: [key technical insight from this task]"
+   ```
+   Record a convention, gotcha, or pattern you discovered. Examples:
+   - `"LEARNED: MenuBarExtra popup closes on NSWindow activate. Use activates:false."`
+   - `"LEARNED: All source adapters must handle nil SUFeedURL gracefully."`
+   - `"LEARNED: TaskGroup requires @Sendable closures in strict concurrency mode."`
+
+4. **Leave completion comment:**
    ```bash
    bd comment {BEAD_ID} "Completed: [summary]"
    ```
 
-4. **Mark status:**
+5. **Mark status:**
    ```bash
    bd update {BEAD_ID} --status inreview
    ```
 
-5. **Return completion report:**
+6. **Return completion report:**
    ```
    BEAD {BEAD_ID} COMPLETE
    Worktree: .worktrees/bd-{BEAD_ID}
@@ -90,7 +99,7 @@ WARNING: You will be BLOCKED if you skip any step. Execute ALL in order:
    Summary: [1 sentence]
    ```
 
-The SubagentStop hook verifies: worktree exists, no uncommitted changes, pushed to remote, bead status updated.
+The SubagentStop hook verifies: worktree exists, no uncommitted changes, pushed to remote, bead status updated, LEARNED comment exists.
 </on-completion>
 
 <banned>
