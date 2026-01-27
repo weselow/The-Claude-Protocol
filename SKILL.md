@@ -77,35 +77,26 @@ ls .claude/agents/scout.md 2>/dev/null && echo "BOOTSTRAP_COMPLETE" || echo "FRE
 
 Ask the user or auto-detect from package.json/pyproject.toml.
 
-### 1.2 MANDATORY: Detect or Install Kanban UI
-
-<mandatory-detection>
-**Run these checks in order:**
+### 1.2 Detect or Install Kanban UI
 
 ```bash
-# Check 1: Is the bead-kanban command installed?
-which bead-kanban 2>/dev/null && echo "KANBAN_INSTALLED" || echo "KANBAN_NOT_FOUND"
+which bead-kanban 2>/dev/null && echo "KANBAN_FOUND" || echo "KANBAN_NOT_FOUND"
 ```
 
-```bash
-# Check 2: Is the Kanban UI server running?
-curl -s --max-time 2 http://localhost:3008/api/health 2>/dev/null && echo "KANBAN_RUNNING" || echo "KANBAN_NOT_RUNNING"
-```
-
-**If KANBAN_INSTALLED or KANBAN_RUNNING** → Use `--with-kanban-ui` flag. Tell the user:
+**If KANBAN_FOUND** → Use `--with-kanban-ui` flag. Tell the user:
 > Detected Beads Kanban UI. Configuring worktree management via API.
 
-**If KANBAN_NOT_FOUND** → Ask the user:
+**If KANBAN_NOT_FOUND** → Ask:
 
 ```
 AskUserQuestion(
   questions=[
     {
-      "question": "Beads Kanban UI not detected. It provides a visual kanban board for tasks, dependency graphs, and worktree management via API. Install it?",
+      "question": "Beads Kanban UI not detected. It adds a visual kanban board with dependency graphs and API-driven worktree management. Install it?",
       "header": "Kanban UI",
       "options": [
-        {"label": "Yes, install it (Recommended)", "description": "Runs: npm install -g beads-kanban-ui. Visual task board at localhost:3008."},
-        {"label": "Skip", "description": "Use git worktrees directly. No UI. You can install later."}
+        {"label": "Yes, install it (Recommended)", "description": "Runs: npm install -g beads-kanban-ui"},
+        {"label": "Skip", "description": "Use git worktrees directly. You can install later."}
       ],
       "multiSelect": false
     }
@@ -113,12 +104,8 @@ AskUserQuestion(
 )
 ```
 
-**After user answers:**
-- If "Yes, install it" → Run `npm install -g beads-kanban-ui`, then use `--with-kanban-ui` flag
+- If "Yes" → Run `npm install -g beads-kanban-ui`, then use `--with-kanban-ui` flag
 - If "Skip" → do NOT use `--with-kanban-ui` flag
-</mandatory-detection>
-
-**DO NOT proceed to Step 2 until Kanban UI detection/choice is resolved.**
 
 ---
 
