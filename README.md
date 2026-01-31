@@ -1,6 +1,6 @@
 # Beads Orchestration
 
-Multi-agent orchestration for Claude Code. An orchestrator investigates issues, manages tasks automatically, and delegates implementation to specialized supervisors.
+Multi-agent orchestration for Claude Code. A co-pilot architect that investigates issues, discusses approach with you, then delegates implementation to specialized supervisors.
 
 **[Beads Kanban UI](https://github.com/AvivK5498/Beads-Kanban-UI)** — Visual task management fully compatible with this workflow. Supports tasks, epics, subtasks, dependencies, and design docs.
 
@@ -36,7 +36,9 @@ The skill walks you through setup, runs the bootstrap via `npx`, then creates te
 
 ## Key Features
 
-🔍 **Investigate → Delegate** — Orchestrator reads code, supervisors implement. Hooks enforce separation.
+🧭 **Co-pilot architect** — Investigates, presents trade-offs, waits for your confirmation before dispatching. Constructive skeptic, not a blind executor.
+
+⚡ **Quick fix path** — Trivial single-file changes skip the bead/worktree/PR overhead. Just dispatch, edit, commit, done.
 
 🌳 **Worktree isolation** — Every task gets its own worktree. Main stays clean. Parallel work without conflicts.
 
@@ -44,9 +46,11 @@ The skill walks you through setup, runs the bootstrap via `npx`, then creates te
 
 🔗 **Epics & dependencies** — Cross-domain work becomes epics with enforced child dependencies. Independent children dispatch in parallel.
 
+📝 **Dispatch auto-logging** — Every supervisor dispatch prompt is automatically captured as a bead comment. Full audit trail, zero manual effort.
+
 🔁 **Follow-up traceability** — Closed beads stay closed. Bug fixes become new beads linked via `bd dep relate` — full history, no reopening.
 
-🧠 **Knowledge base** — Agents capture conventions and gotchas into `.beads/memory/`. Enforced, searchable, surfaced at session start.
+🧠 **Knowledge base** — Agents voluntarily capture conventions and gotchas into `.beads/memory/`. Searchable, surfaced at session start.
 
 🔒 **13 enforcement hooks** — Every workflow step is guarded. See [Hooks](#hooks).
 
@@ -56,9 +60,9 @@ The skill walks you through setup, runs the bootstrap via `npx`, then creates te
 
 ```
 ┌─────────────────────────────────────────┐
-│            ORCHESTRATOR                 │
+│         ORCHESTRATOR (Co-Pilot)         │
 │  Investigates with Grep/Read/Glob       │
-│  Manages tasks automatically (beads)    │
+│  Discusses approach with user           │
 │  Delegates implementation via Task()    │
 └──────────────────┬──────────────────────┘
                    │
@@ -73,28 +77,33 @@ The skill walks you through setup, runs the bootstrap via `npx`, then creates te
   bd-BD-001   bd-BD-002   bd-BD-003
 ```
 
-**Orchestrator:** Investigates the issue, identifies root cause, logs findings to bead, delegates with brief fix instructions.
+**Orchestrator:** Investigates the issue, discusses with user, proposes a plan. Dispatch prompts are auto-logged to the bead as `DISPATCH_PROMPT` comments.
 
 **Supervisors:** Read bead comments for context, create isolated worktrees, execute the fix confidently. Created by discovery agent based on your tech stack.
+
+### Workflow Modes
+
+**Quick Fix** — Single file, obvious fix, fully reversible. No bead, no worktree, no PR. Git commit = audit trail.
+
+**Full Workflow** — Multi-file or uncertain changes. Investigate → discuss → confirm → create bead → dispatch supervisor → worktree → PR → merge.
+
+Default to full workflow when in doubt.
 
 ## Knowledge Base
 
 Agents build a persistent knowledge base as they work. No extra steps — it piggybacks on `bd comment`.
 
 ```bash
-# Supervisor finishes a task and records what it learned
+# Agent records a useful insight (voluntary)
 bd comment BD-001 "LEARNED: TaskGroup requires @Sendable closures in strict concurrency mode."
-
-# Orchestrator logs investigation findings
-bd comment BD-002 "INVESTIGATION: Root cause: SparkleAdapter.swift:45 - nil SUFeedURL crashes XMLParser."
 ```
 
-An async hook intercepts these comments and extracts them into `.beads/memory/knowledge.jsonl`. Each entry is auto-tagged by keyword and attributed to its source (orchestrator vs supervisor).
+An async hook intercepts `LEARNED:` comments and extracts them into `.beads/memory/knowledge.jsonl`. Each entry is auto-tagged by keyword and attributed to its source.
 
 **Why this works:**
 - Zero friction — agents already use `bd comment`, they just add a prefix
 - No database, no embeddings, no external services — one JSONL file, grep + jq to search
-- Enforced — supervisors are blocked from completing without a `LEARNED:` comment
+- Voluntary — agents log insights when they discover something worth remembering
 - Surfaces automatically — session start shows recent knowledge so agents don't re-investigate solved problems
 
 ```bash
@@ -121,7 +130,7 @@ The `relates_to` link gives full traceability without reopening anything. A PreT
 
 **Why this matters:**
 - Merged branches don't get reused — avoids SHA conflicts from squash/rebase merges
-- Each fix gets its own worktree, PR, and LEARNED comment
+- Each fix gets its own worktree and PR
 - Audit trail stays clean — one bead = one unit of work
 
 ## What Gets Installed
@@ -150,9 +159,8 @@ CLAUDE.md             # Orchestrator instructions
 | `enforce-bead-for-supervisor.sh` | Task | Supervisors require BEAD_ID in prompt |
 | `enforce-branch-before-edit.sh` | Edit, Write | Must be in a worktree, not main |
 | `enforce-sequential-dispatch.sh` | Task | Blocks closed/done beads and epic children with unresolved deps |
-| `validate-epic-close.sh` | Bash | Can't close epic with open children |
+| `validate-epic-close.sh` | Bash | Blocks bead close without merged PR; blocks epic close with open children |
 | `inject-discipline-reminder.sh` | Task | Injects discipline skill context |
-| `inject-memory-recall.sh` | Task | Reminds supervisors to search knowledge base before implementing |
 | `remind-inprogress.sh` | Task | Warns about existing in-progress beads |
 
 **PostToolUse** — React after action completes:
@@ -160,13 +168,14 @@ CLAUDE.md             # Orchestrator instructions
 | Hook | Trigger | Purpose |
 |------|---------|---------|
 | `enforce-concise-response.sh` | Task | Limits supervisor response verbosity |
-| `memory-capture.sh` | Bash | Captures LEARNED/INVESTIGATION into knowledge base |
+| `log-dispatch-prompt.sh` | Task | Auto-logs dispatch prompts as DISPATCH_PROMPT bead comments |
+| `memory-capture.sh` | Bash | Captures LEARNED comments into knowledge base |
 
 **SubagentStop** — Validate before supervisor exits:
 
 | Hook | Trigger | Purpose |
 |------|---------|---------|
-| `validate-completion.sh` | Any | Verifies worktree, push, bead status, LEARNED comment |
+| `validate-completion.sh` | Any | Verifies worktree, push, bead status |
 
 **SessionStart** — Run when a new session begins:
 
