@@ -15,12 +15,6 @@ const sourceSkillDir = path.join(packageDir, 'skills', SKILL_NAME);
 
 console.log('\n📦 Installing beads-orchestration skill...\n');
 
-// Check OS
-if (process.platform === 'win32') {
-  console.log('⚠️  Windows is not supported. Use WSL or macOS/Linux.');
-  process.exit(0);
-}
-
 // Create ~/.claude/skills/create-beads-orchestration/
 try {
   fs.mkdirSync(claudeSkillsDir, { recursive: true });

@@ -354,15 +354,14 @@ def setup_memory(project_dir: Path) -> None:
         knowledge_file.touch()
         print("  - Created .beads/memory/knowledge.jsonl")
 
-    # Copy recall script
-    recall_src = TEMPLATES_DIR / "memory" / "recall.sh"
-    recall_dest = memory_dir / "recall.sh"
+    # Copy recall script (Node.js version for cross-platform support)
+    recall_src = TEMPLATES_DIR / "hooks" / "recall.js"
+    recall_dest = memory_dir / "recall.js"
     if recall_src.exists():
         shutil.copy2(recall_src, recall_dest)
-        recall_dest.chmod(recall_dest.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
-        print("  - Copied .beads/memory/recall.sh")
+        print("  - Copied .beads/memory/recall.js")
     else:
-        print("  - WARNING: recall.sh template not found")
+        print("  - WARNING: recall.js template not found")
 
 
 # ============================================================================
@@ -557,7 +556,7 @@ def copy_hooks(project_dir: Path, claude_only: bool = False) -> list:
     # Hooks to skip in claude-only mode (none currently - all hooks apply to both modes)
     skip_in_claude_only = set()
 
-    for hook_file in hooks_template_dir.glob("*.sh"):
+    for hook_file in hooks_template_dir.glob("*.js"):
         # Skip provider enforcement hooks in claude-only mode
         if claude_only and hook_file.name in skip_in_claude_only:
             print(f"  - Skipped {hook_file.name} (claude-only mode)")
@@ -565,7 +564,6 @@ def copy_hooks(project_dir: Path, claude_only: bool = False) -> list:
 
         dest = hooks_dir / hook_file.name
         shutil.copy2(hook_file, dest)
-        dest.chmod(dest.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
         copied.append(hook_file.name)
         print(f"  - Copied {hook_file.name}")
 
@@ -749,7 +747,7 @@ def verify_installation(project_dir: Path, claude_only: bool = False) -> bool:
     # Count files
     hooks_dir = project_dir / ".claude/hooks"
     if hooks_dir.exists():
-        hook_count = len(list(hooks_dir.glob("*.sh")))
+        hook_count = len(list(hooks_dir.glob("*.js")))
         print(f"  - Hooks: {hook_count}")
 
     agents_dir = project_dir / ".claude/agents"
