@@ -116,6 +116,10 @@ function execCommand(cmd, args, opts) {
       encoding: 'utf8',
       timeout: 10000,
       stdio: ['pipe', 'pipe', 'pipe'],
+      // On Windows, npm CLIs (bd, gh) are .cmd wrappers that
+      // execFileSync can't find without shell. Args stay as array
+      // so Node still escapes them properly — no injection risk.
+      shell: process.platform === 'win32',
       ...opts,
     });
     return result.trim();

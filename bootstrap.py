@@ -28,6 +28,10 @@ try:
 except ImportError:
     tomllib = None
 from pathlib import Path
+
+# On Windows, npm/pip install CLI tools as .cmd wrappers.
+# subprocess.run(["bd", ...]) can't find .cmd files without shell=True.
+_SHELL = sys.platform == "win32"
 from datetime import datetime
 import random
 
@@ -185,7 +189,8 @@ def setup_provider_delegator() -> Path:
         ["uv", "venv", str(venv_dir)],
         cwd=SHARED_MCP_DIR,
         capture_output=True,
-        text=True
+        text=True,
+        shell=_SHELL
     )
     if result.returncode != 0:
         print(f"  ERROR: Failed to create venv: {result.stderr}")
@@ -198,7 +203,8 @@ def setup_provider_delegator() -> Path:
         cwd=SHARED_MCP_DIR,
         capture_output=True,
         text=True,
-        env={**os.environ, "VIRTUAL_ENV": str(venv_dir)}
+        env={**os.environ, "VIRTUAL_ENV": str(venv_dir)},
+        shell=_SHELL
     )
     if result.returncode != 0:
         print(f"  ERROR: Failed to install dependencies: {result.stderr}")
@@ -234,7 +240,8 @@ def install_beads(project_dir: Path, claude_only: bool = False) -> bool:
             result = subprocess.run(
                 ["brew", "install", "steveyegge/beads/bd"],
                 capture_output=True,
-                text=True
+                text=True,
+                shell=_SHELL
             )
             if result.returncode == 0:
                 installed = True
@@ -246,7 +253,8 @@ def install_beads(project_dir: Path, claude_only: bool = False) -> bool:
             result = subprocess.run(
                 ["npm", "install", "-g", "@beads/bd"],
                 capture_output=True,
-                text=True
+                text=True,
+                shell=_SHELL
             )
             if result.returncode == 0:
                 installed = True
@@ -270,7 +278,8 @@ def install_beads(project_dir: Path, claude_only: bool = False) -> bool:
             result = subprocess.run(
                 ["go", "install", "github.com/steveyegge/beads/cmd/bd@latest"],
                 capture_output=True,
-                text=True
+                text=True,
+                shell=_SHELL
             )
             if result.returncode == 0:
                 installed = True
@@ -300,7 +309,8 @@ def install_beads(project_dir: Path, claude_only: bool = False) -> bool:
                 ["bd", "init"],
                 cwd=project_dir,
                 capture_output=True,
-                text=True
+                text=True,
+                shell=_SHELL
             )
             if result.returncode == 0:
                 print("  - Initialized via 'bd init'")
@@ -319,7 +329,8 @@ def install_beads(project_dir: Path, claude_only: bool = False) -> bool:
             ["bd", "config", "set", "status.custom", "inreview"],
             cwd=project_dir,
             capture_output=True,
-            text=True
+            text=True,
+            shell=_SHELL
         )
         if result.returncode == 0:
             print("  - Added 'inreview' custom status")
