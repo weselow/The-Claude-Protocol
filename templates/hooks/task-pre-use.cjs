@@ -48,7 +48,7 @@ runHook('task-pre-use', () => {
 
   // worker-supervisor is exempt from sequential checks
   if (subagentType.includes('worker')) {
-    emitGuidance(subagentType, prompt);
+    emitGuidance(subagentType);
     process.exit(0);
   }
 
@@ -124,14 +124,12 @@ runHook('task-pre-use', () => {
   }
 
   // === GUIDANCE (non-blocking) ===
-  emitGuidance(subagentType, prompt);
+  emitGuidance(subagentType);
 });
 
 /** Emit soft reminders (in_progress + discipline skill) */
-function emitGuidance(subagentType, prompt) {
-  if (prompt.includes('BEAD_ID:')) {
-    injectText('IMPORTANT: Before dispatching, ensure bead is in_progress: bd update {BEAD_ID} --status in_progress\n');
-  }
+function emitGuidance(subagentType) {
+  injectText('IMPORTANT: Before dispatching, ensure bead is in_progress: bd update {BEAD_ID} --status in_progress\n');
   if (subagentType.includes('-supervisor')) {
     injectText(`<system-reminder>
 SUPERVISOR DISPATCH: Before implementing, invoke \`/subagents-discipline\` skill.
